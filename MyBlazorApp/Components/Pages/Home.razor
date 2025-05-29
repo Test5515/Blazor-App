@@ -1,7 +1,35 @@
-﻿@page "/"
+@page "/"
+@using MyBlazorApp.Models
+@using MyBlazorApp.Services
+@inject BlogService BlogService
+@inject NavigationManager Navigation
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Blog</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Blog Posts</h1>
 
-Welcome to your new app.
+@if (_blogPosts == null || !_blogPosts.Any())
+{
+    <p>No blog posts yet.</p>
+}
+else
+{
+    <ul>
+        @foreach (var post in _blogPosts)
+        {
+            <li>
+                <a href="@($"/post/{post.Id}")">@post.Title</a>
+                <p><small>By @post.Author on @post.CreatedAt.ToShortDateString()</small></p>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<BlogPost> _blogPosts = new List<BlogPost>();
+
+    protected override void OnInitialized()
+    {
+        _blogPosts = BlogService.GetAllPosts();
+    }
+}

@@ -1,0 +1,41 @@
+@page "/post/{Id:int}"
+@using MyBlazorApp.Models
+@using MyBlazorApp.Services
+@inject BlogService BlogService
+@inject NavigationManager Navigation
+
+<PageTitle>View Post</PageTitle>
+
+@if (_post == null)
+{
+    <p>Post not found.</p>
+}
+else
+{
+    <h1>@_post.Title</h1>
+    <p><em>By @_post.Author on @_post.CreatedAt.ToShortDateString()</em></p>
+    <div>@((MarkupString)_post.Content)</div>
+
+    <hr />
+
+    <a href="@($"/edit/{_post.Id}")" class="btn btn-primary">Edit Post</a>
+    <a href="/" class="btn btn-secondary">Back to Home</a>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private BlogPost? _post; // Nullable to reflect it might not be found
+
+    protected override void OnParametersSet()
+    {
+        _post = BlogService.GetPostById(Id);
+        if (_post != null)
+        {
+            // Optional: Set page title dynamically
+            // This requires injecting PageTitleService or similar if done this way
+            // For simplicity, keeping static PageTitle component above.
+        }
+    }
+}

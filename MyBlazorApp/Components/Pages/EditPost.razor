@@ -1,0 +1,69 @@
+@page "/edit/{Id:int}"
+@using MyBlazorApp.Models
+@using MyBlazorApp.Services
+@inject BlogService BlogService
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Post</PageTitle>
+
+<h1>Edit Post</h1>
+
+@if (_postToEdit == null)
+{
+    <p>Loading post...</p>
+}
+else
+{
+    <EditForm Model="@_postToEdit" OnValidSubmit="@HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="title" class="form-label">Title:</label>
+            <InputText id="title" class="form-control" @bind-Value="_postToEdit.Title" />
+        </div>
+
+        <div class="mb-3">
+            <label for="author" class="form-label">Author:</label>
+            <InputText id="author" class="form-control" @bind-Value="_postToEdit.Author" />
+        </div>
+
+        <div class="mb-3">
+            <label for="content" class="form-label">Content:</label>
+            <InputTextArea id="content" class="form-control" @bind-Value="_postToEdit.Content" rows="5" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="@($"/post/{Id}")" class="btn btn-secondary">Cancel</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private BlogPost? _postToEdit; // Initialize as nullable
+
+    protected override void OnParametersSet()
+    {
+        // Attempt to load the post. If GetPostById returns null (not found),
+        // _postToEdit will remain null, and the UI will show "Loading post..."
+        // A more robust solution might navigate away or show a clearer "Not Found" message.
+        _postToEdit = BlogService.GetPostById(Id);
+        
+        // If the post is truly not found and we want to immediately redirect:
+        // if (_postToEdit == null)
+        // {
+        //     Navigation.NavigateTo("/"); // Or a dedicated "not found" page
+        // }
+    }
+
+    private void HandleSubmit()
+    {
+        if (_postToEdit != null)
+        {
+            BlogService.UpdatePost(_postToEdit);
+            Navigation.NavigateTo($"/post/{_postToEdit.Id}");
+        }
+    }
+}
